@@ -1,0 +1,4 @@
+google.com
+github.com
+8.8.8.8
+amazon.com
