@@ -8,6 +8,7 @@
 #include <net/if.h>
 #include <net/ethernet.h>
 #include <sys/poll.h>
+#include <sys/time.h>
 #include <ifaddrs.h>
 #include <netdb.h>
 #include <stdint.h>
@@ -61,8 +62,9 @@ enum e_type
 typedef struct  s_result
 {
     int port;
-    char service[NI_MAXSERV];
+    char service[NI_MAXSERV*128];
     char status[TOT_TYPE][32];
+    struct s_result *next;
 }               t_result;
 
 typedef struct  s_host
@@ -70,12 +72,13 @@ typedef struct  s_host
     char dest_str[NI_MAXHOST];
     char ipdest_str[INET_ADDRSTRLEN];
     struct sockaddr_in ipdest;
-    t_result *result;
+    t_result *results;
     struct s_host *next;
 }               t_host;
 
 typedef struct  s_thread_args
 {
+    pthread_t tid;
     int snd_sock;
     pcap_t *handle;
     int *ports;
@@ -85,6 +88,7 @@ typedef struct  s_thread_args
 typedef struct  s_types
 {
     char    name[16];
+    int     idx;
     uint8_t bit;
 }               t_types;
 
@@ -104,6 +108,23 @@ typedef struct  s_info
     pthread_mutex_t m_result;
 }               t_info;
 
+typedef struct  s_callback
+{
+    t_result *res;
+    t_types *set;
+    int ident;
+}               t_callback;
+
+struct pseudo_header
+{
+    uint32_t source_address;
+    uint32_t dest_address;
+    uint8_t placeholder;
+    uint8_t protocol;
+    uint16_t tcp_length;
+    struct tcphdr tcp;
+};
+
 extern t_info info;
 
 // main.c
@@ -113,8 +134,14 @@ int     usage(void);
 int     get_args(int ac, char **av);
 
 // utils.c
+int     find_dev(void);
 t_host  *create_node_host(char *str);
 int     add_node_host(t_host *host);
 void    free_hosts(void);
+void    add_node_result(t_host *host, t_result *result);
+double  delta_time(struct timeval *t1, struct timeval *t2);
+
+// scan.c
+void *thread_scan (void *p_ident);
 
 #endif

@@ -1,6 +1,21 @@
 #include "ft_nmap.h"
 #include "ft_getopt.h"
 
+void    shrink_ports(void)
+{
+    int support[MAX_PORT+1] = {0};
+    int j = 0;
+
+    memcpy(support, info.ports, (MAX_PORT+1)*sizeof(int));
+    bzero(info.ports, ARRAY_SIZE(info.ports));
+    for (int i = 0; i < MAX_PORT+1; ++i) {
+        if (support[i]) {
+            info.ports[j] = i;
+            ++j;
+        }
+    }
+}
+
 int     set_ports_opt(char *str)
 {
     uint64_t start = 0, end = 0;
@@ -8,7 +23,6 @@ int     set_ports_opt(char *str)
     char *tok = strtok(str, ",");
     char *ptr = 0;
 
-    if (!tok) return -1;
     while (tok) {
         if ((ptr = strchr(tok, '-'))) {
             start = strtoull(tok, 0, 10);
@@ -18,18 +32,22 @@ int     set_ports_opt(char *str)
             if (start > end) {
                 start = start^end; end = start^end; start = end^start;
             }
-            for (uint64_t i = start; start <= end; ++start, ++info.nports)
+            for (uint64_t i = start; start <= end; ++start) {
+                if (!info.ports[start]) ++info.nports;
                 info.ports[start] = 1;
+            }
         } else {
             start = strtoull(tok, 0, 10);
             if (start > MAX_PORT)
                 return -1;
+            if (!info.ports[start]) ++info.nports;
             info.ports[start] = 1;
-            ++info.nports;
         }
         tok = strtok(0, ",");
     }
-    return info.nports ? 0 : -1;
+    if (info.nports)
+        shrink_ports();
+    return 0;
 }
 
 int     set_types(char *str)
@@ -122,6 +140,11 @@ int     get_args(int ac, char **av)
                 set_types(ft_optarg);
                 break;
         }
+    }
+    if (!info.nports) {
+        for (int i = 1; i < MAX_PORT+1; ++i, ++(info.nports))
+            info.ports[i] = 1;
+        shrink_ports();
     }
     if (!info.type)
         info.type |= (B_SYN|B_NULL|B_ACK|B_FIN|B_XMAS|B_UDP);
