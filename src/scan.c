@@ -78,7 +78,7 @@ uint16_t checksum(void *addr, int len)
     return (unsigned short)(~checksum);
 }
 
-void    prepare_packet_udp(uint8_t *packet, uint8_t type, int port)
+void    prepare_packet_udp(uint8_t *packet, int port)
 {
     struct ip    *ip  = (struct ip *)packet;
     struct udphdr   *udp = (struct udphdr *)(packet + sizeof(struct ip));
@@ -150,7 +150,7 @@ int     send_packet(int ident, int port, uint8_t type)
     errno = 0;
 
     if (type & B_UDP) {
-        prepare_packet_udp(packet, type, port);
+        prepare_packet_udp(packet, port);
     } else {
         prepare_packet_tcp(packet, type, port);
     }
@@ -187,6 +187,7 @@ int     handler_icmp_type(t_result *res, t_types *set, struct icmp *icmp)
         (icmp->icmp_code == ICMP_UNREACH_PORT || icmp->icmp_code == ICMP_UNREACH_FILTER_PROHIB)) {
         memcpy(res->status[set->idx], CLOSE, strlen(CLOSE)+1);
     }
+    return 0;
 }
 
 int     handler_tcp_type(int ident, t_result *res, t_types *set, struct tcphdr *tcp)
@@ -198,10 +199,12 @@ int     handler_tcp_type(int ident, t_result *res, t_types *set, struct tcphdr *
         memcpy(res->status[set->idx], CLOSE, strlen(CLOSE)+1);
     }
     send_packet(ident, res->port, B_RST);
+    return 0;
 }
 
 void callback(u_char *user, const struct pcap_pkthdr *h, const u_char *bytes)
 {
+    (void) h;
     t_callback *arg = (t_callback *)user;
     struct ip       *ip  = (struct ip *)(ETH_HLEN + bytes);
     struct tcphdr   *tcp = (struct tcphdr *)(ETH_HLEN + bytes + sizeof(struct ip));

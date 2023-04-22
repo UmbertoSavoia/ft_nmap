@@ -80,7 +80,7 @@ void    print_result(void)
     for (info.host = info.hosts; info.host; info.host = info.host->next) {
         printf("\n"
                "Target: %s - %s ",
-               info.host->dest_str, info.host->ipdest_str, info.host->r_dns);
+               info.host->dest_str, info.host->ipdest_str);
         if (!(info.no_dns))
             printf("(%s)\n", info.host->r_dns);
         else

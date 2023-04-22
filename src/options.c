@@ -32,7 +32,7 @@ int     set_ports_opt(char *str)
             if (start > end) {
                 start = start^end; end = start^end; start = end^start;
             }
-            for (uint64_t i = start; start <= end; ++start) {
+            for (; start <= end; ++start) {
                 if (!info.ports[start]) ++info.nports;
                 info.ports[start] = 1;
             }

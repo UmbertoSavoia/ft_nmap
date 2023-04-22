@@ -3,7 +3,6 @@
 int     find_dev(void)
 {
     errno = 0;
-    char *ret = 0;
     struct ifaddrs *ifap = 0;
 
     if (getifaddrs(&ifap) < 0) {
@@ -32,7 +31,6 @@ int     resolve_destination(char *str, t_host *host)
     int error = 0, on = 1, sock = 0;
     struct addrinfo hints = {0};
     struct addrinfo *addrinfo_list = 0, *tmp = 0;
-    struct sockaddr_storage addr;
     errno = 0;
 
     hints.ai_family = AF_INET;

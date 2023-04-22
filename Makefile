@@ -1,7 +1,7 @@
 TARGET = ft_nmap
 
 CC = gcc
-CFLAG = -g #-Wall -Wextra -Werror
+CFLAG = -Wall -Wextra -Werror
 LIB = -lpthread -lpcap
 RM = rm -rf
 
