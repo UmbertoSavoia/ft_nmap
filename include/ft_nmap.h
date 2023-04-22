@@ -1,6 +1,7 @@
 #ifndef FT_NMAP_H
 #define FT_NMAP_H
 
+#define _GNU_SOURCE
 #include <netinet/ip.h>
 #include <netinet/ip_icmp.h>
 #include <netinet/udp.h>
@@ -9,6 +10,8 @@
 #include <net/ethernet.h>
 #include <sys/poll.h>
 #include <sys/time.h>
+#include <sys/socket.h>
+#include <sys/types.h>
 #include <ifaddrs.h>
 #include <netdb.h>
 #include <stdint.h>
@@ -62,6 +65,7 @@ enum e_type
 typedef struct  s_result
 {
     int port;
+    uint8_t open;
     char service[NI_MAXSERV*128];
     char status[TOT_TYPE][32];
     struct s_result *next;
@@ -70,6 +74,7 @@ typedef struct  s_result
 typedef struct  s_host
 {
     char dest_str[NI_MAXHOST];
+    char dns[NI_MAXHOST];
     char ipdest_str[INET_ADDRSTRLEN];
     struct sockaddr_in ipdest;
     t_result *results;
@@ -142,6 +147,10 @@ void    add_node_result(t_host *host, t_result *result);
 double  delta_time(struct timeval *t1, struct timeval *t2);
 
 // scan.c
-void *thread_scan (void *p_ident);
+void    *thread_scan(void *p_ident);
+
+// print.c
+void    print_header(void);
+void    print_result(void);
 
 #endif

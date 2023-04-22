@@ -61,40 +61,13 @@ void    set_tasks_for_thread(void)
     }
 }
 
-void    print_header(void)
+void    resolve_dns_hosts(void)
 {
-    printf("Scan Configurations\n"
-           "Source network interface: %s\n"
-           "Source IP address: %s\n"
-           "Number of threads: %d\n"
-           "Number of ports to scan: %d\n"
-           "Scans to be performed: ",
-           info.dev, info.ipsrc_str, info.nthreads, info.nports);
-    for (int i = 0; i < TOT_TYPE; ++i)
-        if (info.type & info.set_types[i].bit)
-            printf("%s ", info.set_types[i].name);
-    printf("\n"
-           "Scanning...\n");
-}
+    t_host *t = 0;
 
-void    print_result(void)
-{
-    for (info.host = info.hosts; info.host; info.host = info.host->next) {
-        printf("\n"
-               "Target: %s - %s\n"
-               "%-8s %-20s %s\n"
-               "-------------------------------------------------------\n",
-               info.host->dest_str, info.host->ipdest_str,
-               "Port", "Service", "State");
-        for (t_result *res = info.host->results; res; res = res->next) {
-            printf("%-8d %-20s ", res->port, res->service);
-            for (int i = 0; i < TOT_TYPE; ++i) {
-                if (info.type & info.set_types[i].bit) {
-                    printf("%s(%s) ", info.set_types[i].name, res->status[info.set_types[i].idx]);
-                }
-            }
-            printf("\n");
-        }
+    for (t = info.hosts; t; t = t->next) {
+        getnameinfo((struct sockaddr *)&(t->ipdest), sizeof(struct sockaddr),
+                t->dns, sizeof(t->dns), 0, 0, NI_IDN);
     }
 }
 
@@ -110,6 +83,7 @@ int     main(int ac, char **av)
         return cleen_exit(1);
     if (find_dev() < 0)
         return cleen_exit(1);
+    resolve_dns_hosts();
     set_tasks_for_thread();
     pthread_mutex_init(&info.m_result, 0);
     print_header();

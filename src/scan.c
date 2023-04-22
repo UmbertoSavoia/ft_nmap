@@ -193,6 +193,7 @@ int     handler_tcp_type(int ident, t_result *res, t_types *set, struct tcphdr *
 {
     if (tcp->ack && tcp->syn) {
         memcpy(res->status[set->idx], OPEN, strlen(OPEN)+1);
+        res->open = 1;
     } else {
         memcpy(res->status[set->idx], CLOSE, strlen(CLOSE)+1);
     }
@@ -225,7 +226,7 @@ int     recv_packet(int ident, t_result *res, uint8_t type, t_types *set)
 
     fds[0].fd = rcv_sock;
     fds[0].events = POLLIN;
-    while ((ret = poll(fds, 1, 2000)) > 0) {
+    while ((ret = poll(fds, 1, (type & B_NULL) ? 500 : 2000)) > 0) {
         if (fds[0].revents & POLLIN) {
             if (pcap_dispatch(info.thread_args[ident].handle, -1, callback, (u_char *)(&arg))) {
                 return 1;
