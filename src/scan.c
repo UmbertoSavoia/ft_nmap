@@ -89,7 +89,7 @@ void    prepare_packet_udp(uint8_t *packet, uint8_t type, int port)
     ip->ip_hl = sizeof(struct ip) >> 2;
     ip->ip_p = IPPROTO_UDP;
     ip->ip_len = sizeof(struct ip) + sizeof(struct udphdr);
-    ip->ip_ttl = 64;
+    ip->ip_ttl = (info.ttl) ? info.ttl : 64;
     ip->ip_v = IPVERSION;
     ip->ip_id = htons(getpid());
     udp->uh_sport = htons(getpid());
@@ -111,7 +111,7 @@ void    prepare_packet_tcp(uint8_t *packet, uint8_t type, int port)
     ip->ip_hl = sizeof(struct ip) >> 2;
     ip->ip_p = IPPROTO_TCP;
     ip->ip_len = sizeof(struct ip) + sizeof(struct tcphdr);
-    ip->ip_ttl = 64;
+    ip->ip_ttl = (info.ttl) ? info.ttl : 64;
     ip->ip_v = IPVERSION;
     ip->ip_id = htons(getpid());
     ip->ip_sum = 0;

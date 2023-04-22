@@ -7,12 +7,16 @@ int     usage(void)
 {
     char msg[] = "\n"
                  "ft_nmap [OPTIONS]\n"
-                 " --help      Print this help screen\n"
-                 " --ports     ports to scan (1-10 or 1,2,3 or 1,5-15)\n"
-                 " --host      ip addresses in dot format or hostname to scan\n"
-                 " --file      file name containing IP addresses or hostname to scan\n"
-                 " --speedup   [250 max] number of parallel threads to use\n"
-                 " --scan      SYN/NULL/FIN/XMAS/ACK/UDP\n";
+                 " --help           Print this help screen\n"
+                 " --ports <val>    ports to scan (1-10 or 1,2,3 or 1,5-15)\n"
+                 " --host <val>     ip addresses in dot format or hostname to scan\n"
+                 " --file <val>     file name containing IP addresses or hostname to scan\n"
+                 " --speedup <val>  [250 max] number of parallel threads to use\n"
+                 " --scan <val>     SYN/NULL/FIN/XMAS/ACK/UDP\n"
+                 " --exclude <val>  exclude host from file list\n"
+                 " --n              never do DNS resolution [default: always]\n"
+                 " --ttl <val>      set IP time-to-live field\n"
+                 " --open           only show open ports\n";
     fwrite(msg, sizeof(msg), 1, stderr);
     return 1;
 }
@@ -67,7 +71,7 @@ void    resolve_dns_hosts(void)
 
     for (t = info.hosts; t; t = t->next) {
         getnameinfo((struct sockaddr *)&(t->ipdest), sizeof(struct sockaddr),
-                t->dns, sizeof(t->dns), 0, 0, NI_IDN);
+                t->r_dns, sizeof(t->r_dns), 0, 0, NI_IDN);
     }
 }
 
@@ -83,7 +87,8 @@ int     main(int ac, char **av)
         return cleen_exit(1);
     if (find_dev() < 0)
         return cleen_exit(1);
-    resolve_dns_hosts();
+    if (!(info.no_dns))
+        resolve_dns_hosts();
     set_tasks_for_thread();
     pthread_mutex_init(&info.m_result, 0);
     print_header();

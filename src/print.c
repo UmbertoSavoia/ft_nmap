@@ -30,6 +30,20 @@ uint8_t check_if_one_is_open(void)
     return 0;
 }
 
+uint8_t check_if_one_is_close_filtered(void)
+{
+    for (t_result *res = info.host->results; res; res = res->next) {
+        for (int i = 0; i < TOT_TYPE; ++i) {
+            if (info.type & info.set_types[i].bit) {
+                if (!(res->open)) {
+                    return 1;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
 void    print_result_port_line(uint8_t print_open)
 {
     int padding = 0, n_type = 0;
@@ -65,13 +79,17 @@ void    print_result(void)
 {
     for (info.host = info.hosts; info.host; info.host = info.host->next) {
         printf("\n"
-               "Target: %s - %s (%s)\n",
-               info.host->dest_str, info.host->ipdest_str, info.host->dns);
-        if (check_if_one_is_open()) {
+               "Target: %s - %s ",
+               info.host->dest_str, info.host->ipdest_str, info.host->r_dns);
+        if (!(info.no_dns))
+            printf("(%s)\n", info.host->r_dns);
+        else
+            printf("\n");
+
+        if (check_if_one_is_open())
             print_result_port_line(1);
+
+        if (!info.only_open && check_if_one_is_close_filtered())
             print_result_port_line(0);
-        } else {
-            print_result_port_line(0);
-        }
     }
 }

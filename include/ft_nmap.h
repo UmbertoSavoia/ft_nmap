@@ -40,6 +40,10 @@
 #define OPT_FILE    3
 #define OPT_SPEEDUP 4
 #define OPT_SCAN    5
+#define OPT_EXCLUDE 6
+#define OPT_NODNS   7
+#define OPT_TTL     8
+#define OPT_OPEN    9
 
 #define OPEN            "open"
 #define CLOSE           "close"
@@ -74,7 +78,7 @@ typedef struct  s_result
 typedef struct  s_host
 {
     char dest_str[NI_MAXHOST];
-    char dns[NI_MAXHOST];
+    char r_dns[NI_MAXHOST];
     char ipdest_str[INET_ADDRSTRLEN];
     struct sockaddr_in ipdest;
     t_result *results;
@@ -111,6 +115,9 @@ typedef struct  s_info
     t_thread_args thread_args[MAX_THREAD];
     t_types set_types[TOT_TYPE];
     pthread_mutex_t m_result;
+    uint32_t ttl;
+    uint8_t no_dns;
+    uint8_t only_open;
 }               t_info;
 
 typedef struct  s_callback
